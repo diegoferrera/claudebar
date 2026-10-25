@@ -1,0 +1,5 @@
+ClaudeBar.app/
+old/
+hook.sh
+.DS_Store
+*.bak*
