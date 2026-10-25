@@ -20,6 +20,7 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelega
         Prefs.register()
         try? FileManager.default.createDirectory(at: deliveredDir, withIntermediateDirectories: true)
         menu.delegate = self; item.menu = menu
+        if demo { Demo.fill(store); renderTitle(); Demo.shoot(self); return }
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         store.history = History.load(); store.agents = Agents.load()
         (store.session, store.week, store.updated) = loadUsageCache()
@@ -36,6 +37,8 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelega
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool { openPanel(); return false }
+    // no modo demonstração, fechar a janela encerra o app
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { demo }
 
     // MARK: dados
 
@@ -116,7 +119,7 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelega
             w.setFrameAutosaveName("ClaudeBarPanel")
             window = w
         }
-        store.sessions = loadSessions()
+        if !demo { store.sessions = loadSessions() }
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
@@ -130,7 +133,7 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelega
 
     // MARK: barra e menu
 
-    func menuNeedsUpdate(_ m: NSMenu) { store.sessions = loadSessions(); buildMenu() }
+    func menuNeedsUpdate(_ m: NSMenu) { if !demo { store.sessions = loadSessions() }; buildMenu() }
 
     func renderTitle() {
         let waiting = store.sessions.contains { $0.state == .waiting }
@@ -200,7 +203,9 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWindowDelega
         let q = NSMenuItem(title: "Sair", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"); menu.addItem(q)
     }
 
-    @objc func refreshNow() { refreshUsage(force: backoff == 0); lastPrune = .distantPast; refreshSessions() }
+    @objc func refreshNow() {
+        if demo { return }
+        refreshUsage(force: backoff == 0); lastPrune = .distantPast; refreshSessions() }
 }
 
 let app = NSApplication.shared

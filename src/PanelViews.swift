@@ -9,7 +9,7 @@ final class Store: ObservableObject {
     @Published var updated: Date?
     @Published var sessions: [Sess] = []
     @Published var history: [Sample] = []
-    @Published var agents: [Agent] = [] { didSet { Agents.save(agents) } }
+    @Published var agents: [Agent] = [] { didSet { if !demo { Agents.save(agents) } } }
 
     func name(_ s: Sess) -> String { Agents.match(agents, s)?.name ?? s.project }
 

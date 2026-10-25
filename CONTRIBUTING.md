@@ -11,3 +11,9 @@ Sugestões, correções e melhorias são bem-vindas.
 - **macOS 13.** O código compila só com as Command Line Tools (sem Xcode), então evite APIs do macOS 14 ou mais novo.
 - **Visual nativo.** Menu e painel seguem o jeito dos menus do sistema (Bateria, Wi-Fi) e do Ajustes do Sistema.
 - **Nada pessoal no código.** Sem caminhos, nomes ou contas fixos; use `$HOME`, `whoami` e afins.
+
+## Prints e testes sem dados reais
+
+`CLAUDEBAR_DEMO=1 ClaudeBar.app/Contents/MacOS/ClaudeBar` abre o app com dados de exemplo, sem ler nem gravar nada em `~/.claude` e sem consultar a API. `./tools/screenshots.sh` usa esse modo para refazer os prints de `docs/`.
+
+Issues e pull requests em inglês também são bem-vindos.

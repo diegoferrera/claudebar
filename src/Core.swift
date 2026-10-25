@@ -239,7 +239,7 @@ enum Agents {
 // MARK: - iPhone: o widget do Scriptable lê este arquivo pelo iCloud Drive
 
 let scriptableDir = home.appendingPathComponent("Library/Mobile Documents/iCloud~dk~simonbs~Scriptable/Documents")
-let widgetSource = home.appendingPathComponent("claude-menubar/widget.js")
+let widgetSource = Bundle.main.url(forResource: "widget", withExtension: "js") ?? home.appendingPathComponent("claude-menubar/widget.js")
 var lastShareKey = ""
 var lastShareDate = Date.distantPast
 

@@ -1,26 +1,41 @@
 # ClaudeBar
 
-App de barra de menus para macOS que mostra o uso do plano Claude (sessão de 5 h e semana) sem precisar abrir o Claude, e acompanha as sessões do Claude Code abertas no Mac.
+**English** · [Português](README.pt-BR.md)
 
-- **Barra de menus:** ✳ com a % da sessão e da semana, em verde, laranja ou vermelho. Pisca quando um terminal pede permissão.
-- **Menu:** limites do plano com horário de reset e a lista de sessões (trabalhando, pedindo permissão, terminou).
-- **Painel** (abra o app ou ⌘, no menu):
-  - Visão geral com gráfico do uso e previsão de quando o limite acaba.
-  - Sessões abertas, com aviso quando dois terminais estão na mesma pasta.
-  - Agentes: dê um nome a cada terminal, proíba pastas (o hook bloqueia edição nelas) e deixe recados que o agente recebe na próxima mensagem.
-  - Ajustes: cores, o que aparece na barra, notificações, abrir ao iniciar.
-- **Notificações** quando uma sessão termina ou pede permissão.
-- **Widget de iPhone** pelo app [Scriptable](https://scriptable.app), lendo um arquivo que o Mac grava no iCloud Drive.
+A macOS menu bar app that shows your Claude plan usage (the 5-hour session and the weekly limit) without opening Claude, and keeps track of the Claude Code sessions running on your Mac.
 
-Leve: consulta o uso a cada 2 minutos, não lê os históricos do Claude Code e monta o menu só quando é aberto.
+<p align="center">
+  <img src="docs/menu.png" width="300" alt="Menu bar dropdown with plan limits and open sessions">
+  <img src="docs/overview.png" width="520" alt="Panel: session and weekly usage, forecast and history">
+</p>
 
-## Requisitos
+- **Menu bar:** ✳ with the session and weekly percentages in green, orange or red. It blinks when a terminal is waiting for permission.
+- **Menu:** plan limits with their reset times, and your sessions (working, waiting for permission, done).
+- **Panel** (open the app, or ⌘, from the menu):
+  - Overview with a usage chart and a forecast of when you'll hit the limit.
+  - Open sessions, with a warning when two terminals work in the same folder.
+  - Agents: name each terminal, lock folders it can't change (enforced by a hook), and leave a note it receives with your next message.
+  - Settings: colors, what the menu bar shows, notifications, launch at login.
+- **Notifications** when a session finishes or asks for permission.
+- **iPhone widget** through [Scriptable](https://scriptable.app), reading a file the Mac writes to iCloud Drive.
 
-- macOS 13 ou mais novo (Apple Silicon ou Intel)
-- Claude Code logado com uma conta Pro/Max (o app usa o login guardado no Keychain)
-- Xcode Command Line Tools (`xcode-select --install`) e `jq` (`brew install jq`)
+<p align="center">
+  <img src="docs/sessions.png" width="270" alt="Open sessions">
+  <img src="docs/agents.png" width="270" alt="Agents: name, locked folders and note">
+  <img src="docs/settings.png" width="270" alt="Settings">
+</p>
 
-## Instalar
+The interface is in Brazilian Portuguese for now; translations are welcome. Screenshots use demo mode (sample data); regenerate them with `./tools/screenshots.sh`.
+
+Lightweight: it checks usage every 2 minutes, never reads Claude Code's transcripts, and builds the menu only when you open it.
+
+## Requirements
+
+- macOS 13 or later (Apple Silicon or Intel)
+- Claude Code signed in with a Pro or Max account (the app reads the login Claude Code keeps in the Keychain)
+- Xcode Command Line Tools (`xcode-select --install`) and `jq` (`brew install jq`)
+
+## Install
 
 ```bash
 git clone https://github.com/diegoferrera/claudebar.git
@@ -28,38 +43,40 @@ cd claudebar
 ./install.sh
 ```
 
-O `install.sh` compila o app, faz ele abrir ao iniciar o Mac e acrescenta os hooks do ClaudeBar em `~/.claude/settings.local.json` (com backup em `settings.local.json.bak-claudebar`; hooks que já existem continuam lá).
+`install.sh` builds the app, makes it launch at login, and adds the ClaudeBar hooks to `~/.claude/settings.local.json`. It backs the file up to `settings.local.json.bak-claudebar` first and keeps any hooks you already have.
 
-Depois de mudar o código, recompile com `./build.sh`.
+After changing the code, rebuild with `./build.sh`.
 
-### Widget do iPhone
+### iPhone widget
 
-1. Ligue o iCloud Drive no Mac e instale o Scriptable no iPhone.
-2. Com o app rodando, o arquivo `Claude.js` aparece na pasta do Scriptable.
-3. No iPhone, adicione um widget do Scriptable e escolha o script **Claude**.
+1. Turn on iCloud Drive on the Mac and install Scriptable on the iPhone.
+2. With ClaudeBar running, `Claude.js` shows up in the Scriptable folder.
+3. On the iPhone, add a Scriptable widget and pick the **Claude** script.
 
-## Como funciona
+## How it works
 
-- O uso vem de `api.anthropic.com/api/oauth/usage` (endpoint não documentado, o mesmo da tela "Seu uso"), com o token do Claude Code lido do Keychain. Se a API limitar as consultas (429), o app espera mais antes de tentar de novo e mostra o último valor.
-- `session.sh` é chamado pelos hooks do Claude Code e grava o estado de cada sessão em `~/.claude/menubar/sessions/`.
-- No `PreToolUse`, `session.sh guard` nega edições nas pastas proibidas do agente.
-- Os terminais são reconhecidos pelo id do Maestri quando existe; senão, pela pasta.
+- Usage comes from `api.anthropic.com/api/oauth/usage` (undocumented; it's what the "Usage" screen uses), with Claude Code's token from the Keychain. If the API rate-limits (429), the app backs off and keeps showing the last value.
+- `session.sh` runs from Claude Code hooks and writes each session's state to `~/.claude/menubar/sessions/`.
+- On `PreToolUse`, `session.sh guard` denies edits inside an agent's locked folders.
+- Terminals are recognized by their Maestri terminal id when there is one, otherwise by folder.
 
-## Estrutura
+## Layout
 
 ```
-src/Core.swift        dados: uso, sessões, histórico, agentes, ajustes, widget
-src/MenuViews.swift   menu da barra
-src/PanelViews.swift  janela do painel
-src/main.swift        app, timers, barra de menus
-session.sh            hooks do Claude Code
-widget.js             widget do Scriptable
-tools/icon.swift      gera o ícone
-resources/            Info.plist e ícone do app
+src/Core.swift        data: usage, sessions, history, agents, settings, widget
+src/MenuViews.swift   menu bar dropdown
+src/PanelViews.swift  panel window
+src/main.swift        app, timers, status item
+src/Demo.swift        sample data for demo mode
+session.sh            Claude Code hooks
+widget.js             Scriptable widget
+tools/icon.swift      draws the app icon
+tools/screenshots.sh  regenerates docs/ screenshots (demo mode)
+resources/            Info.plist and app icon
 ```
 
-## Colaborar
+## Contributing
 
-Veja [CONTRIBUTING.md](CONTRIBUTING.md). Licença [MIT](LICENSE): pode usar, modificar e distribuir.
+See [CONTRIBUTING.md](CONTRIBUTING.md) (in Portuguese; issues and pull requests in English are welcome too). [MIT](LICENSE) licensed.
 
-> Projeto independente, sem ligação com a Anthropic. Usa um endpoint não documentado que pode mudar a qualquer momento.
+> Independent project, not affiliated with Anthropic. It relies on an undocumented endpoint that may change at any time.
