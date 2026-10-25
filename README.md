@@ -16,7 +16,7 @@ Leve: consulta o uso a cada 2 minutos, não lê os históricos do Claude Code e 
 
 ## Requisitos
 
-- macOS 13 ou mais novo, Apple Silicon
+- macOS 13 ou mais novo (Apple Silicon ou Intel)
 - Claude Code logado com uma conta Pro/Max (o app usa o login guardado no Keychain)
 - Xcode Command Line Tools (`xcode-select --install`) e `jq` (`brew install jq`)
 
@@ -57,3 +57,9 @@ widget.js             widget do Scriptable
 tools/icon.swift      gera o ícone
 resources/            Info.plist e ícone do app
 ```
+
+## Colaborar
+
+Veja [CONTRIBUTING.md](CONTRIBUTING.md). Licença [MIT](LICENSE): pode usar, modificar e distribuir.
+
+> Projeto independente, sem ligação com a Anthropic. Usa um endpoint não documentado que pode mudar a qualquer momento.
